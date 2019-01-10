@@ -124,9 +124,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
-
 STATIC_URL = '/static/'
-STATIC_ROOT = '/home/ubuntu/static'
+STATIC_ROOT = '/home/ubuntu/desafio_cumplo/static'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'), '/static/')
 
 API_KEY_SBIF = 'a6d97a548aae4e36c8fcf0afc814daa47e44506d'
