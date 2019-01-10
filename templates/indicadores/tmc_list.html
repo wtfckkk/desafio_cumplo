@@ -1,0 +1,151 @@
+{% extends 'base/base.html' %}
+{% load staticfiles %}
+{% load comma_to_dot %}
+{% load remove_dot %}
+
+{% block content %}
+{% if indicadores %}
+    <h1>Consulta de Tasa de Interés Máxima Convencional<small> &nbsp;<a href="/indicadores" class="btn btn-info">Volver</a></small></h1>
+<hr>
+<div class="row">
+<div class="col-md-6 col-xs-12 pane">
+<h5><small>Periodo del {{start}} al {{start}}</small></h5>
+    <table class="table table-hover header-fixed2">
+        <thead>
+            <th> Tipo  </th>
+            <th> Créditos </th>
+            <th> Valor </th>
+            <th width="85"> Fecha </th>
+        </thead>
+        <tbody>
+        {% for indicador in indicadores.valores %}
+            <tr>
+                <td>  {{ indicador.Tipo }} </td>
+                <td> <small> {{ indicador.SubTitulo }} </small></td>
+                <td> <span class="valor">{{ indicador.Valor }}</span>% </td>
+                <td>  {{ indicador.Fecha|slice:":-3" }} </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+</div>
+<div class="col-md-6 col-xs-12">
+    <div id="grafico"></div>
+</div>
+</div>
+{% else %}
+    <h1>No hay registros para estas fechas</h1> <br><a href="/indicadores" class="btn btn-info">Volver</a>
+{% endif %}
+{% endblock %}
+{% block extrajs %}
+<script>
+
+var chart = Highcharts.chart('grafico', {
+
+    chart: {
+        type: 'line',
+        zoomType: 'x',
+        panning: true,
+        panKey: 'shift',
+        scrollablePlotArea: {
+            minWidth: 600
+        }
+    },
+    title: {
+        text: 'Tasas de Interés'
+    },
+
+    subtitle: {
+        text: 'Fuente: api.sbif.cl/'
+    },
+    yAxis: {
+        title: {
+            text: '%'
+        },
+    },
+    xAxis: {
+        categories:[
+                {% for date in list_dates %}
+                        moment('{{ date }}').format('MM-YY'),
+                {% endfor %}
+        ],
+    },
+    legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+    },
+
+    plotOptions: {
+        series: {
+            label: {
+                connectorAllowed: false
+            },
+            cursor: 'pointer',
+            events: {
+                click: function (event) {
+                    $(chart.series).each(function(){
+                        this.setVisible(false, false);
+                    });
+                    this.show()
+                    chart.redraw();
+                }
+            }
+        },
+    },
+    series: [
+    {% for tipo in list_tipos %}
+        {
+            name: 'Tipo {{tipo}}',
+            data: [{% for i in indicadores.valores %}
+                    {% if i.Tipo == tipo %} {{ i.Valor }},{% endif %}
+                {% endfor %}
+            ],
+            id: '{{tipo}}',
+        },
+        {% for key, max in maximum_series_data.items %}
+        {
+            name: '{{max.name}}',
+            data : [{% for val in max.data %}{% if val == '0' %}null,{%else%} {{val}},{%endif%} {% endfor %}],
+            lineWidth: 0,
+            linkedTo: '{{max.tipo}}',
+            marker: {
+                enabled: true,
+                radius: 6,
+                symbol: 'diamond',
+            },
+            showInLegend: false,
+            tooltip: {
+                valueDecimals: 2
+            },
+            states: {
+                hover: {
+                    lineWidthPlus: 0
+                }
+            }
+        },
+    {% endfor %}
+    {% endfor %}
+    ],
+
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 500
+            },
+            chartOptions: {
+                legend: {
+                    layout: 'horizontal',
+                    align: 'center',
+                    verticalAlign: 'bottom'
+                }
+            }
+        }]
+    },
+    credits:{
+        enabled:false
+    }
+});
+
+</script>
+{% endblock %}

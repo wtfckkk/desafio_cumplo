@@ -1,0 +1,51 @@
+body{
+padding-top: 65px;
+  background-image: url(../img/stressed_linen.png);
+  background-repeat: repeat;
+
+}
+.navbar {
+    background-color: #00ba68 !important;
+}
+
+.header-fixed {
+    width: 100%
+}
+
+.header-fixed > thead,
+.header-fixed > tbody,
+.header-fixed > thead > tr,
+.header-fixed > tbody > tr,
+.header-fixed > thead > tr > th,
+.header-fixed > tbody > tr > td {
+    display: block;
+}
+
+.header-fixed > tbody > tr:after,
+.header-fixed > thead > tr:after {
+    content: ' ';
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+
+.header-fixed > tbody {
+    overflow-y: auto;
+    height: 20vw;
+}
+
+.header-fixed > tbody > tr > td,
+.header-fixed > thead > tr > th {
+    width: 50%;
+    float: left;
+}
+
+
+.footer {
+    width: 640px;
+    margin: 0% -320px;
+    position: fixed;
+    left: 50%;
+    bottom: 0%;
+    text-align: center ;
+}

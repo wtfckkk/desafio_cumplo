@@ -1,0 +1,47 @@
+{% extends 'base/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="text-center">
+    <img src="{% static 'img/cumplo.png' %}" title="Desafío Cumplo" width="230vw;">
+    <br><br>
+    <hr>
+{% if error %}
+    <div class="col-md-4" style="margin-left: 33vw;">
+        <div class="alert alert-dismissible alert-secondary">
+            <button onclick="$('.alert').hide()" type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Nope!</strong> <small>{{error}}</small>
+        </div>
+    </div>
+{% endif %}
+<div>
+<form method="post" class="form" >
+    {% csrf_token %}
+    {% for field in form %}
+
+        <div class="form-group col-md-2 " style="margin-left: 41vw;">
+            <label class="label">{{ field.label }}</label>
+
+            {{ field }}
+
+            <small>{{ field.errors }}</small>
+        </div>
+    {% endfor %}
+    <a class="btn btn-danger" href="/"> Volver</a> &nbsp;&nbsp;&nbsp;&nbsp;
+    <button class="btn btn-success" type="submit"> Consultar</button>
+</form>
+</div>
+</div>
+{% endblock %}
+{% block extrajs %}
+<script>
+  $(function() {
+    $( ".datepicker" ).datepicker({
+      maxDate: '0',
+      changeYear: true,
+      yearRange: "2014:2019",
+      dateFormat: 'dd/mm/yy',
+    });
+  });
+  </script>
+{% endblock %}

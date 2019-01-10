@@ -1,0 +1,148 @@
+{% extends 'base/base.html' %}
+{% load staticfiles %}
+{% load comma_to_dot %}
+{% load remove_dot %}
+
+{% block content %}
+{% if indicadores %}
+
+    <h1>Consulta de {{flag}} <small> &nbsp;<a href="/indicadores" class="btn btn-info">Volver</a></small></h1>
+    <hr>
+<div class="row">
+<div class="col-md-5 col-xs-12 pane">
+    <div class="container">
+    <div class="row alert alert-dismissible alert-secondary text-center" style="font-size:14px;">
+        <div class="col-md-4">
+            Mínimo  :  <strong>$ <span id="minimo"></span> </strong>
+        </div>
+        <div class="col-md-4">
+            Máximo  :  <strong>$ <span id="maximo"></span> </strong>
+        </div>
+        <div class="col-md-4">
+            Promedio:  <strong>$ <span id="promedio"></span> </strong>
+        </div>
+    </div>
+    </div>
+    <h5><small>Periodo del {{start}} al {{end}}</small></h5>
+    <table class="table table-hover header-fixed">
+        <thead>
+            <th>{{flag}}</th>
+            <th> Fecha </th>
+        </thead>
+        <tbody>
+        {% for indicador in indicadores.valores %}
+            <tr>
+                <td>$ <span class="valor">{{ indicador.Valor }}</span> </td>
+                <td>  {{ indicador.Fecha }} </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+</div>
+<div class="col-md-7 col-xs-12">
+    <div id="grafico"></div>
+</div>
+</div>
+{% else %}
+    <h1>No hay registros para estas fechas</h1> <br><a href="/indicadores" class="btn btn-info">Volver</a>
+{% endif %}
+
+
+{% endblock %}
+{% block extrajs %}
+<script>
+//Function to add
+function add(a, b) {
+    return a + b;
+}
+
+// Get Values from views.py then sum, calculate max , min & average
+var valores = [{% for i in indicadores.valores %}parseInt({{ i.Valor|remove_dot|comma_to_dot }}),{% endfor %}];
+var sum = valores.reduce(add, 0);
+max = Math.max.apply(null, valores);
+min = Math.min.apply(null, valores);
+var average = sum/valores.length;
+
+//Put values in view
+$("#promedio").text(parseInt(average).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1."));
+$("#maximo").text(parseInt(max).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1."));
+$("#minimo").text(parseInt(min).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1."));
+
+Highcharts.chart('grafico', {
+        chart: {
+        type: 'area',
+        zoomType: 'x',
+        panning: true,
+        panKey: 'shift',
+        scrollablePlotArea: {
+            minWidth: 600
+        }
+    },
+    title: {
+        text: 'Valores {{flag}}'
+    },
+
+    subtitle: {
+        text: 'Fuente: api.sbif.cl/'
+    },
+
+    yAxis: {
+        title: {
+            text: 'Pesos Chilenos'
+        }
+    },
+    xAxis: {
+        type: 'datetime',
+        title: {
+            text: 'Fecha',
+        },
+        categories: [{% for i in indicadores.valores %}moment('{{ i.Fecha }}').format('DD-MM-YYYY'),{% endfor %}],
+    },
+    legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle',
+    },
+
+    plotOptions: {
+    area: {
+        dataLabels: {
+            enabled: false
+        }
+    }
+},
+
+    series: [{
+        name: 'Valor {{flag}}',
+        data: valores,
+        lineColor: Highcharts.getOptions().colors[1],
+        color: Highcharts.getOptions().colors[2],
+        marker: {
+            enabled: false
+        },
+        fillOpacity: 0.5,
+        threshold: null,
+
+    }],
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 500
+            },
+            chartOptions: {
+                legend: {
+                    layout: 'horizontal',
+                    align: 'center',
+                    verticalAlign: 'bottom'
+                }
+            }
+        }]
+    },
+    credits:{
+        enabled:false
+    }
+
+});
+
+</script>
+{% endblock %}
